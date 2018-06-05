@@ -1,0 +1,97 @@
+{
+	"info": {
+		"_postman_id": "5fbb51a2-c667-4cf1-ac67-1aa5c688feb2",
+		"name": "Worldpay",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Purchase",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "6b0be033-e1ea-4671-b658-905952c9ad21",
+						"type": "text/javascript",
+						"exec": [
+							"// Generate an ID for the request so that it's unique each time.",
+							"function generateOrderId() {",
+							"  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {",
+							"    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);",
+							"    return v.toString(16);",
+							"  });",
+							"}",
+							"",
+							"pm.environment.set(\"orderId\", generateOrderId());"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "4587c235-6bbc-4590-91eb-96f1a6764a8a",
+						"type": "text/javascript",
+						"exec": [
+							"console.log(pm.environment.get(\"{{userName}}\"))",
+							"console.log(pm.environment.get(\"{{xmlPassword}}\"))",
+							"//we need worldpay to give status 200 OK",
+							"pm.test(\"response is ok\", function() {",
+							"   pm.response.to.have.status(200); ",
+							"});",
+							"",
+							"//convert response to JSON so we can extract the xml",
+							"var responseBody = pm.response.text();",
+							"var responseJSON = xml2Json(responseBody);",
+							"",
+							"//check that we have a reference ID",
+							"pm.test(\"response has a payload\", function() {",
+							"   //var referenceId = responseJSON.reply.orderStatus.id;",
+							"   pm.expect(responseJSON.paymentService.reply).to.exist;",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{xmlPassword}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{userName}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "username",
+						"value": "",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "text/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE paymentService PUBLIC \"-//Worldpay//DTD Worldpay PaymentService v1//EN\"\n  \"http://dtd.worldpay.com/paymentService_v1.dtd\">\n<paymentService version=\"1.4\" merchantCode=\"VGWPOKUSD\">\n     <submit>\n         <order orderCode=\"{{orderId}}\" installationId=\"{{installationId}}\">\n             <description>100000 Gold Coins ( free $20.00 $weeps cash)</description>\n             <amount currencyCode=\"USD\" exponent=\"2\" value=\"2000\"/>\n             <paymentMethodMask>\n                 <include code=\"ALL\"/>\n             </paymentMethodMask>\n             <shopper>\n                 <shopperEmailAddress>andrei@tchijov.com</shopperEmailAddress>\n                 <authenticatedShopperID>POK-72</authenticatedShopperID>\n             </shopper>\n             <billingAddress>\n                 <address> \n                     <address1>123 Some Street</address1>\n                     <address2></address2>\n                     <address3></address3>\n                     <postalCode>90104</postalCode>\n                     <city>Seattle</city>\n                     <state>WA</state>\n                     <countryCode>US</countryCode>\n                 </address>\n             </billingAddress>\n             <createToken>\n                 <tokenEventReference>72</tokenEventReference>\n                 <tokenReason>POK-72 Token</tokenReason>\n             </createToken>\n         </order>\n     </submit>\n</paymentService>"
+				},
+				"url": {
+					"raw": "{{purchaseURL}}",
+					"host": [
+						"{{purchaseURL}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
