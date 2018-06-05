@@ -32,6 +32,8 @@
 						"id": "4587c235-6bbc-4590-91eb-96f1a6764a8a",
 						"type": "text/javascript",
 						"exec": [
+							"console.log(pm.environment.get(\"{{userName}}\"))",
+							"console.log(pm.environment.get(\"{{xmlPassword}}\"))",
 							"//we need worldpay to give status 200 OK",
 							"pm.test(\"response is ok\", function() {",
 							"   pm.response.to.have.status(200); ",

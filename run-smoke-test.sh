@@ -16,7 +16,7 @@ export TMP_PATH="./resource/tmp"
 
 # search keys - we look for these in the environment json files
 export WUSERNAME_PLACEHOLDER="\"USERNAMEPLACEHOLDER\""
-export WXMLPASSWORD_PLACEHOLDER="\"XMLPLACEHOLDER\""
+export WXMLPASSWORD_PLACEHOLDER="\"XMLPASSWORDPLACEHOLDER\""
 
 # define the exit codes
 export WUSERNAME_NOT_SET=1
