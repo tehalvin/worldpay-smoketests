@@ -17,6 +17,8 @@ export TMP_PATH="./resource/tmp"
 # search keys - we look for these in the environment json files
 export WUSERNAME_PLACEHOLDER="\"USERNAMEPLACEHOLDER\""
 export WXMLPASSWORD_PLACEHOLDER="\"XMLPASSWORDPLACEHOLDER\""
+export BANKOUTPASSWORD_PLACEHOLDER="\"BANKOUTPASSWORDPLACEHOLDER\""
+export MERCHANTREFERENCE_PLACEHOLDER="\"MERCHANTREFERENCEPLACEHOLDER\""
 
 # define the exit codes
 export WUSERNAME_NOT_SET=1
@@ -31,7 +33,7 @@ usage() {
 		\n\trun smoketest on worldpay VGWPOK USD test: $0 -e $POKTEST"
 }
 
-# check if $LLCAUTHKEY is set
+# check if $WUSERNAME is set
 function checkUserName {
 	if [ -z $WUSERNAME ]
 	then
@@ -42,13 +44,33 @@ function checkUserName {
 }
 
 
-# check if $PLAYERPROCESSMANAGERAUTHKEY is set
+# check if $WXMLPASSWORD is set
 function checkXMLPassword {
 	if [ -z $WXMLPASSWORD ]
 	then
 		(>&2 echo "ERROR: Local environment variable '\$WXMLPASSWORD' not set.\
 			\n set it with command \`export WXMLPASSWORD=\"\$VALUE\"\` and try again")
 		exit $WXMLPASSWORD_NOT_SET
+	fi
+}
+
+# check if $MERCHANTREFERENCE is set
+function checkMerchantReference {
+	if [ -z $MERCHANTREFERENCE ]
+	then
+		export MERCHANTREFERENCE='VGWPOKUSD'
+		(>&2 echo "WARNING: Local environment variable '\$MERCHANTREFERENCE' not set. USING VGWPOKUSD. \
+			\n set it with command \`export MERCHANTREFERENCE=\"\$VALUE\"\` and try again if a different Merchant Reference is required.")
+	fi
+}
+
+# check if $BANKOUTPASSWORD is set
+function checkBankoutPassword {
+	if [ -z $BANKOUTPASSWORD ]
+	then
+		export BANKOUTPASSWRD='PasswordNotSet'
+		(>&2 echo "WARNING: Local environment variable '\$BANKOUTPASSWORD' not set. Bankouts will fail. \
+			\n set it with command \`export BANKOUTPASSWORD=\"\$VALUE\"\` and try again if you need to test Bankouts.")
 	fi
 }
 
@@ -80,7 +102,9 @@ function checkEOption {
 function buildEnvFile {
 	cp $FILE_PATH$OPTARG$PATH_EXT $TMP_PATH"/"$OPTARG$PATH_EXT
 	sed -i '.bak' "s/$WUSERNAME_PLACEHOLDER/\"$WUSERNAME\"/g" $TMP_PATH"/"$OPTARG$PATH_EXT
-	sed -i '.bak' "s/$WXMLPASSWORD_PLACEHOLDER/\"$WXMLPASSWORD\"/g" $TMP_PATH"/"$OPTARG$PATH_EXT	
+	sed -i '.bak' "s/$WXMLPASSWORD_PLACEHOLDER/\"$WXMLPASSWORD\"/g" $TMP_PATH"/"$OPTARG$PATH_EXT
+	sed -i '.bak' "s/$BANKOUTPASSWORD_PLACEHOLDER/\"$BANKOUTPASSWORD\"/g" $TMP_PATH"/"$OPTARG$PATH_EXT
+	sed -i '.bak' "s/$MERCHANTREFERENCE_PLACEHOLDER/\"$MERCHANTREFERENCE\"/g" $TMP_PATH"/"$OPTARG$PATH_EXT
 }
 
 # now run the newman via docker commands

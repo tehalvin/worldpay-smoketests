@@ -92,6 +92,78 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Bankout Request",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "9d563936-34ea-4e54-b3ef-6295a3c8871d",
+						"type": "text/javascript",
+						"exec": [
+							"// Generate an ID for the request so that it's unique each time.",
+							"function generateUUID() {",
+							"  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {",
+							"    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);",
+							"    return v.toString(16);",
+							"  });",
+							"}",
+							"",
+							"//Generate a random payment amount for the request between 0 and 350",
+							"function generatePaymentAmount() {",
+							"    return Math.floor((Math.random() * 350) + 1);",
+							"}",
+							"",
+							"//set a purchaseId",
+							"pm.environment.set(\"paymentReference\", generateUUID());",
+							"pm.environment.set(\"requestReference\", generateUUID());",
+							"pm.environment.set(\"paymentAmount\", generatePaymentAmount());"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e62bcd52-8136-4ddd-9cbe-1318f99c0624",
+						"type": "text/javascript",
+						"exec": [
+							"//ensure that the cashout cancellation was created",
+							"pm.test(\"request was accepted\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "text/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"\n               xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n    <soap:Body>\n    <payToBankAccountV3 xmlns=\"http://merchantapi.envoyservices.com\">\n      <auth>\n        <username>pok-mas-api-TEST@vgw.co</username>\n        <password>{{bankoutPassword}}</password>\n      </auth>\n      <requestReference>{{requestReference}}</requestReference>\n      <paymentInstructions>\n        <paymentInstructionV3>\n          <paymentDetails>\n            <countryCode>US</countryCode>\n            <sourceCurrency>USD</sourceCurrency>\n            <sourceAmount>{{paymentAmount}}</sourceAmount>\n            <targetCurrency>USD</targetCurrency>\n            <targetAmount>0</targetAmount>\n            <sourceOrTarget>S</sourceOrTarget>\n            <merchantReference>{{merchantReference}}</merchantReference>\n            <paymentReference>{{paymentReference}}</paymentReference>\n            <email />\n            <mobile />\n            <fastPayment>N</fastPayment>\n          </paymentDetails>\n          <paymentTemplate TemplateID=\"4bbc918f56d9e011b725001ec9e61285\" TemplateType=\"4\" TemplateCurrency=\"USD\" TemplateCountry=\"US\">\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"BankName\" FieldType=\"Input\" Value=\"BANK OF AMERICA\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"CustomerName\" FieldType=\"Input\" Value=\"Marvin Maria\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"BankAccountNumber\" FieldType=\"Input\" Value=\"483067882451\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"BankCode\" FieldType=\"Input\" Value=\"021000322\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"BranchCode\" FieldType=\"Input\" Value=\"\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"SWIFT\" FieldType=\"Input\" Value=\"\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"additionalInfo1\" FieldType=\"Input\" Value=\"\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"AddressLine1\" FieldType=\"Input\" Value=\"294 Webster Ave_ apt. A7\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"AddressLine2\" FieldType=\"Input\" Value=\"\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"City\" FieldType=\"Input\" Value=\"Brooklyn\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"Postcode\" FieldType=\"Input\" Value=\"11230\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"CountryCode\" FieldType=\"Select\" Value=\"US\" />\n            <Row MaxLength=\"0\" MinLength=\"0\" Id=\"DateOfBirth\" FieldType=\"Complex\" Value=\"--\" />\n          </paymentTemplate>\n          <paymentItemId>00000000-0000-0000-0000-000000000000</paymentItemId>\n        </paymentInstructionV3>\n      </paymentInstructions>\n    </payToBankAccountV3>\n  </soap:Body>\n</soap:Envelope>"
+				},
+				"url": {
+					"raw": "https://test.envoytx.com/",
+					"protocol": "https",
+					"host": [
+						"test",
+						"envoytx",
+						"com"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "SOAP Bankout API"
+			},
+			"response": []
 		}
 	]
 }
